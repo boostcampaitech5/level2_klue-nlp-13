@@ -9,7 +9,7 @@ from transformers import AutoModelForSequenceClassification
 
 
 class Model(pl.LightningModule):
-    def __init__(self, MODEL_NAME, model_config, lr):
+    def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler):
         '''
         모델 생성
         MODEL_NAME: 사용할 모델
@@ -24,9 +24,14 @@ class Model(pl.LightningModule):
         self.MODEL_NAME = MODEL_NAME
         self.model_config = model_config
         self.lr = lr
-        
+        self.optim = optim        
+        self.scheduler = scheduler
+
         self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
-        self.loss_func = torch.nn.CrossEntropyLoss()
+        self.loss_dict = {
+            'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
+            }
+        self.loss_func = self.loss_dict[loss]
 
     def forward(self, x):
         """
@@ -135,8 +140,17 @@ class Model(pl.LightningModule):
         return logits
     
     def configure_optimizers(self):
-       """
-       use AdamW as optimizer
-       """
-       optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
-       return optimizer
+        self.optimizer_dict={
+            'AdamW': torch.optim.AdamW(self.parameters(), lr=self.lr)
+            }
+        self.lr_scheduler_dict={
+        }
+        """
+        use AdamW as optimizer
+        """
+        optimizer = self.optimizer_dict[self.optim]
+        if self.scheduler == 'None':
+            return optimizer
+        else:
+            lr_scheduler = self.lr_scheduler_dict[self.scheduler]
+            return [optimizer, lr_scheduler]

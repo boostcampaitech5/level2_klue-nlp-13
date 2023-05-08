@@ -10,7 +10,7 @@ train:
   optim: AdamW
   shuffle: True
   max_len: 50
+  scheduler: None
 inference:
   model: klue/bert-base
   batch_size: 128
-  model_dir: ./model.pt
