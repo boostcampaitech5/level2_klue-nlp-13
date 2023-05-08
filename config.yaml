@@ -1,0 +1,16 @@
+admin: hype연어 # 실험자 이름
+patience: 5
+seed: 42
+train:
+  model: klue/bert-base
+  batch_size: 128
+  epoch: 1
+  LR: 0.00001
+  LossF: CrossEntropyLoss
+  optim: AdamW
+  shuffle: True
+  max_len: 50
+inference:
+  model: klue/bert-base
+  batch_size: 128
+  model_dir: ./model.pt

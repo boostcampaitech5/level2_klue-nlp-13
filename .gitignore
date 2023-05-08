@@ -1,0 +1,16 @@
+.cache/
+.dotnet/
+.git/
+.local/
+.nv/
+.vscode-server/
+basecode/
+lightning_logs/
+data/
+results/
+.profile
+.viminfo
+.wget-hsts
+.ipynb_checkpoints/
+.jupyter/
+level2_klue-nlp-13/
