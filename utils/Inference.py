@@ -1,4 +1,5 @@
 import os
+import wandb
 import pandas as pd
 import pickle as pickle
 import pytorch_lightning as pl
@@ -6,6 +7,7 @@ import torch
 from utils.Model import Model
 from utils.DataLoader import DataLoader
 from utils.Utils import *
+from pytorch_lightning.loggers import WandbLogger
 
 
 
@@ -13,7 +15,8 @@ def inference(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     dataloader = DataLoader(cfg['inference']['model'], cfg['inference']['batch_size'])
 
-    trainer = pl.Trainer(accelerator="auto")
+    wandb_logger = WandbLogger(save_dir=save_path)
+    trainer = pl.Trainer(accelerator="auto", logger=wandb_logger)
 
     model = torch.load(f'{save_path}/{folder_name}_model.pt')
     predicts = trainer.predict(model, datamodule=dataloader)
