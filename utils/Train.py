@@ -26,7 +26,7 @@ def train(cfg):
     wandblog는 results 폴더에 실행모델과 함께 저장됩니다
     '''
     wandb.init(name=folder_name, project="KLUE", entity="hypesalmon", dir=save_path)
-    wandb_logger = WandbLogger()
+    wandb_logger = WandbLogger(save_dir=save_path)
     wandb_logger.experiment.config.update(cfg)
     
     trainer = pl.Trainer(accelerator = "auto",
