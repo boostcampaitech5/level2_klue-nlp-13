@@ -13,4 +13,4 @@ results/
 .wget-hsts
 .ipynb_checkpoints/
 .jupyter/
-level2_klue-nlp-13/
+*.pyc
