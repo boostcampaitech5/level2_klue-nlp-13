@@ -49,7 +49,7 @@ class Model(pl.LightningModule):
         y = batch['labels']
 
         loss = self.loss_func(logits, y)
-        self.log("train_loss: ",loss)
+        self.log("train_loss",loss)
 
         logits = logits.detach().cpu()
         y = y.detach().cpu()
@@ -57,8 +57,8 @@ class Model(pl.LightningModule):
 
         f1 = klue_re_micro_f1(preds, y)
         acc = accuracy_score(y, preds)
-        self.log("train_f1_score: ", f1)
-        self.log("train_acc_score: ", acc)
+        self.log("train_f1_score", f1)
+        self.log("train_acc_score", acc)
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -69,7 +69,7 @@ class Model(pl.LightningModule):
         y = batch['labels']
 
         loss = self.loss_func(logits, y)
-        self.log("valid_loss: ",loss)
+        self.log("valid_loss",loss)
 
         y = y.detach().cpu()
         logits = logits.detach().cpu()
@@ -77,8 +77,8 @@ class Model(pl.LightningModule):
 
         f1 = klue_re_micro_f1(preds, y)
         acc = accuracy_score(y, preds)
-        self.log("valid_f1_score: ", f1)
-        self.log("valid_acc_score: ", acc)
+        self.log("valid_f1_score", f1)
+        self.log("valid_acc_score", acc)
 
         self.validation_step_outputs.append({"logits": logits, "y": y})
     
@@ -111,8 +111,8 @@ class Model(pl.LightningModule):
 
         f1 = klue_re_micro_f1(preds, y)
         acc = accuracy_score(y, preds)
-        self.log("test_f1_score: ", f1)
-        self.log("test_acc_score: ", acc)
+        self.log("test_f1_score", f1)
+        self.log("test_acc_score", acc)
         
         self.test_step_outputs.append({"logits": logits, "y": y})
 
