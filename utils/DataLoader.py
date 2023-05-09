@@ -5,7 +5,7 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
-from utils.DataPreprocessing import remove_duplicate
+from utils.DataPreprocessing import remove_duplicate, use_token
 
 class DataLoader(pl.LightningDataModule):
     def __init__(self, model_name, batch_size, shuffle=True):
@@ -23,6 +23,7 @@ class DataLoader(pl.LightningDataModule):
         """
         pd_dataset = pd.read_csv(dataset_dir)
         pd_dataset = remove_duplicate(pd_dataset)
+        pd_dataset = use_token(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
         
         return dataset
