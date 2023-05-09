@@ -12,6 +12,7 @@ class DataLoader(pl.LightningDataModule):
         self.model_name = model_name
         self.batch_size = batch_size
         self.shuffle = shuffle
+        self.num_workers = 8
     
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
     
@@ -88,11 +89,11 @@ class DataLoader(pl.LightningDataModule):
             self.predict_dataset = Dataset(tokenized_predict, predict_label)
     
     def train_dataloader(self):
-        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
+        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle, num_workers = self.num_workers)
     def val_dataloader(self):
-        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     #     return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size)
     def predict_dataloader(self):
-        return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def test_dataloader(self):
-        return torch.utils.data.DataLoader(self.test_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
