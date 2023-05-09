@@ -152,5 +152,5 @@ class Model(pl.LightningModule):
         if self.scheduler == 'None':
             return optimizer
         else:
-            lr_scheduler = self.lr_scheduler_dict[self.scheduler]
-            return [optimizer, lr_scheduler]
+            scheduler = self.lr_scheduler_dict[self.scheduler]
+            return [optimizer], [scheduler]
