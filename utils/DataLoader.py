@@ -5,6 +5,7 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
+from utils.DataPreprocessing import remove_duplicate
 
 class DataLoader(pl.LightningDataModule):
     def __init__(self, model_name, batch_size, shuffle=True):
@@ -21,6 +22,7 @@ class DataLoader(pl.LightningDataModule):
         csv 파일을 경로에 맡게 불러 옵니다.
         """
         pd_dataset = pd.read_csv(dataset_dir)
+        pd_dataset = remove_duplicate(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
         
         return dataset
