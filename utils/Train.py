@@ -40,10 +40,20 @@ def train(cfg):
         mode='max',
     )
 
+    checkpoint = ModelCheckpoint(
+        dirpath ='./checkpoints/',
+        filename = cfg['train']['model']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
+        every_n_epochs = 1
+    )
+
+
+
+    
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['train']['epoch'],
                          log_every_n_steps = 1,
-                         logger = wandb_logger)
+                         logger = wandb_logger,
+                         callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
     dataloader = DataLoader(cfg['train']['model'], cfg['train']['batch_size'], cfg['train']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
