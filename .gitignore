@@ -19,3 +19,4 @@ results/
 .bash_history
 config.yaml
 .eda/
+nohup.out
