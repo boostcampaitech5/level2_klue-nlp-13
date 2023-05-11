@@ -5,6 +5,7 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
+from sklearn.model_selection import train_test_split
 
 class DataLoader(pl.LightningDataModule):
     def __init__(self, model_name, batch_size, shuffle=True):
@@ -60,27 +61,56 @@ class DataLoader(pl.LightningDataModule):
             )
         return tokenized_sentences
 
+    def split(self):
+        """
+        Split the dataset into training and validation data.
+        """
+        train_dataset = self.load_data("./data/train.csv")
+
+        #train_size:valid_size = 8:2
+        train_set, valid_set = train_test_split(train_dataset, test_size=0.2, random_state=42, shuffle=True)
+        
+        train_label = label_to_num(train_set['label'].values)
+        valid_label = label_to_num(valid_set['label'].values)
+
+        tokenized_train = self.tokenized_dataset(train_set, self.tokenizer)
+        tokenized_valid = self.tokenized_dataset(valid_set, self.tokenizer)
+        
+        self.train_dataset = Dataset(tokenized_train, train_label)
+        self.valid_dataset = Dataset(tokenized_valid, valid_label) 
+
+    def nonSplit(self):
+        """
+        without splitting
+        """
+        train_dataset = self.load_data("./data/train.csv")
+        #valid_datset = self.load_data("./data/valid.csv")
+
+        train_label = label_to_num(train_dataset['label'].values)
+        #valid_label = label_to_num(val_dataset['label'].values)
+
+        tokenized_train = self.tokenized_dataset(train_dataset, self.tokenizer)
+        #tokenized_valid = self.tokenized_dataset(valid_dataset, self.tokenizer)
+
+        self.train_dataset = Dataset(tokenized_train, train_label)
+        #self.valid_dataset = Dataset(tokenized_valid, valid_label)
+
     def setup(self, stage='fit'):
         '''
         모델 사용 목적에 따른 데이터셋 생성
         stage: 모델 사용 목적(fit or test or predict)
         '''
         if stage == 'fit':
-            train_dataset = self.load_data("./data/train.csv")
-            #valid_datset = self.load_data("./data/valid.csv")
-            train_label = label_to_num(train_dataset['label'].values)
-            #valid_label = label_to_num(val_dataset['label].values)
-            tokenized_train = self.tokenized_dataset(train_dataset, self.tokenizer)
-            #tokenized_valid = self.tokenized_dataset(valid_dataset, self.tokenizer)
-
-            self.train_dataset = Dataset(tokenized_train, train_label)
-            #self.valid_dataset = Dataset(tokenized_valid, valid_label)
+            self.split()
+            #self.nonSplit()
+            
         elif stage == 'test':
             test_dataset = self.load_data("./data/train.csv")
             test_label = label_to_num(test_dataset['label'].values)
             tokenized_test = self.tokenized_dataset(test_dataset, self.tokenizer)
 
             self.test_dataset = Dataset(tokenized_test, test_label)
+
         elif stage == 'predict':
             predict_dataset = self.load_data("./data/test_data.csv")
             predict_label = list(map(int, predict_dataset["label"].values))
@@ -91,8 +121,8 @@ class DataLoader(pl.LightningDataModule):
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle, num_workers = self.num_workers)
     def val_dataloader(self):
-        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
-    #     return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size)
+        #return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
+        return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size)
     def predict_dataloader(self):
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def test_dataloader(self):
