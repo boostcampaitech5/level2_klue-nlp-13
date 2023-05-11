@@ -32,8 +32,8 @@ class DataLoader(pl.LightningDataModule):
         subject_entity = []
         object_entity = []
         for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
-            i = i[1:-1].split(',')[0].split(':')[1]
-            j = j[1:-1].split(',')[0].split(':')[1]
+            i = eval(i)['word']
+            j = eval(j)['word']
 
             subject_entity.append(i)
             object_entity.append(j)
@@ -66,7 +66,7 @@ class DataLoader(pl.LightningDataModule):
         stage: 모델 사용 목적(fit or test or predict)
         '''
         if stage == 'fit':
-            train_dataset = self.load_data("./data/train.csv")
+            train_dataset = self.load_data("./eda/mlm_predict.csv")
             #valid_datset = self.load_data("./data/valid.csv")
             train_label = label_to_num(train_dataset['label'].values)
             #valid_label = label_to_num(val_dataset['label].values)
