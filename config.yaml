@@ -14,3 +14,10 @@ train:
 inference:
   model: klue/bert-base
   batch_size: 128
+EarlyStopping:
+  turn_on: True # False
+  monitor: valid_f1_score # valid_acc_score / valid_loss
+  min_delta: 0.00
+  patience: 3
+  verbose: True 
+
