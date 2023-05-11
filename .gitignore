@@ -1,4 +1,5 @@
 .cache/
+.config/
 .dotnet/
 .git/
 .local/
@@ -8,9 +9,12 @@ basecode/
 lightning_logs/
 data/
 results/
+.netrc
 .profile
 .viminfo
 .wget-hsts
 .ipynb_checkpoints/
 .jupyter/
 *.pyc
+.bash_history
+config.yaml
