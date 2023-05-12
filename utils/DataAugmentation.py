@@ -24,7 +24,7 @@ def data_augmentation(cfg):
     '''
     make new sentence and concat to vanilla data
     '''
-    dataset = pd.read_csv('./data/train.csv')
+    dataset = pd.read_csv('./data/unofficial_train.csv')
     method = cfg['data_processing']['method']
 
     for data in dataset.itertuples():
@@ -68,13 +68,22 @@ def get_new_data(data, method):
     '''
     make new data as dataframe
     '''
-    entity = [eval(data.subject_entity)['word'], eval(data.object_entity)['word']]
+    subject_entity = eval(data.subject_entity)
+    object_entity = eval(data.object_entity)
+    entity = [subject_entity['word'], object_entity['word']]
     #change augmentation method by changing 'new_sentence'
     augmentation_method = {'random_deletion': random_deletion(data.sentence, entity),
                            'mlm_predict': mlm_augmentation(data.sentence, entity)}
     new_sentences = augmentation_method[method]
-    new_data = pd.DataFrame({'id': [0]*len(new_sentences), 'sentence': new_sentences, 'subject_entity': [data.subject_entity]*len(new_sentences), 
-                             'object_entity': [data.object_entity]*len(new_sentences), 'label': [data.label]*len(new_sentences), 'source': [data.source]*len(new_sentences)})
+    new_data=pd.DataFrame()
+    for new_sentence in new_sentences:
+        subject_entity['start_idx']=new_sentence.find(entity[0])
+        subject_entity['end_idx']=subject_entity['start_idx']+len(entity[0])-1
+        object_entity['start_idx']=new_sentence.find(entity[1])
+        object_entity['end_idx']=object_entity['start_idx']+len(entity[1])-1
+        temp = pd.DataFrame({'id': [0], 'sentence': [new_sentence], 'subject_entity': [subject_entity], 
+                             'object_entity': [object_entity], 'label': [data.label], 'source': [data.source]})
+        new_data = pd.concat([new_data, temp])
     return new_data
 
 
