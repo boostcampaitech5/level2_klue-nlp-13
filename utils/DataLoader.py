@@ -5,6 +5,7 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
+from utils.DataPreprocessing import remove_duplicate, use_sotype_token
 from sklearn.model_selection import train_test_split
 
 class DataLoader(pl.LightningDataModule):
@@ -22,6 +23,8 @@ class DataLoader(pl.LightningDataModule):
         csv 파일을 경로에 맡게 불러 옵니다.
         """
         pd_dataset = pd.read_csv(dataset_dir)
+        pd_dataset = remove_duplicate(pd_dataset)
+        pd_dataset = use_sotype_token(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
         
         return dataset
