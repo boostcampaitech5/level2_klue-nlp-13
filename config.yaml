@@ -11,6 +11,11 @@ model:
   shuffle: True
   max_len: 50
   scheduler: None
-  dataset: mlm_predict(kykim/bert-kor-base, kykim/albert-kor-base, bert-base-multilingual-cased, xlm-roberta-base)
+EarlyStopping:
+  turn_on: True # False
+  monitor: valid_f1_score # valid_acc_score / valid_loss
+  min_delta: 0.00
+  patience: 3
+  verbose: True 
 data_processing:
   method: mlm_predict

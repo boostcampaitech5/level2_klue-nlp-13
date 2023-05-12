@@ -16,7 +16,9 @@ results/
 .ipynb_checkpoints/
 .jupyter/
 *.pyc
+checkpoints
 .bash_history
 config.yaml
 .eda/
 nohup.out
+
