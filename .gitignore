@@ -1,4 +1,5 @@
 .cache/
+.config/
 .dotnet/
 .git/
 .local/
@@ -8,6 +9,7 @@ basecode/
 lightning_logs/
 data/
 results/
+.netrc
 .profile
 .viminfo
 .wget-hsts
@@ -15,3 +17,8 @@ results/
 .jupyter/
 *.pyc
 checkpoints
+.bash_history
+config.yaml
+.eda/
+nohup.out
+
