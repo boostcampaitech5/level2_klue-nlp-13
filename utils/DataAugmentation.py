@@ -24,7 +24,7 @@ def data_augmentation(cfg):
     '''
     make new sentence and concat to vanilla data
     '''
-    dataset = pd.read_csv('./data/unofficial_train.csv')
+    dataset = pd.read_csv('./data/train.csv')
     method = cfg['data_processing']['method']
 
     for data in dataset.itertuples():
