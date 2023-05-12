@@ -33,8 +33,8 @@ class DataLoader(pl.LightningDataModule):
         subject_entity = []
         object_entity = []
         for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
-            i = i[1:-1].split(',')[0].split(':')[1]
-            j = j[1:-1].split(',')[0].split(':')[1]
+            i = eval(i)['word']
+            j = eval(j)['word']
 
             subject_entity.append(i)
             object_entity.append(j)
@@ -103,7 +103,7 @@ class DataLoader(pl.LightningDataModule):
         if stage == 'fit':
             self.split()
             #self.nonSplit()
-            
+        
         elif stage == 'test':
             test_dataset = self.load_data("./data/train.csv")
             test_label = label_to_num(test_dataset['label'].values)

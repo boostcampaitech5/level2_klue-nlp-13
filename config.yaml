@@ -1,16 +1,16 @@
-admin: hype연어 # 실험자 이름
+admin: 김주성 # 실험자 이름
 patience: 5
 seed: 42
-train:
-  model: klue/bert-base
-  batch_size: 128
-  epoch: 1
+model:
+  model_name: klue/roberta-large
+  batch_size: 16
+  epoch: 5
   LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
   max_len: 50
   scheduler: None
-inference:
-  model: klue/bert-base
-  batch_size: 128
+  dataset: mlm_predict(kykim/bert-kor-base, kykim/albert-kor-base, bert-base-multilingual-cased, xlm-roberta-base)
+data_processing:
+  method: mlm_predict
