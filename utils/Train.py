@@ -41,7 +41,7 @@ def train(cfg):
 
     checkpoint = ModelCheckpoint(
         dirpath ='./checkpoints/',
-        filename = cfg['train']['model']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
+        filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
         every_n_epochs = 1
     )
 
@@ -54,7 +54,7 @@ def train(cfg):
                          logger = wandb_logger,
                          callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['shuffle'])
+    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 

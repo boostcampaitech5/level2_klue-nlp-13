@@ -9,12 +9,13 @@ from utils.DataPreprocessing import remove_duplicate, use_sotype_token
 from sklearn.model_selection import train_test_split
 
 class DataLoader(pl.LightningDataModule):
-    def __init__(self, model_name, batch_size, shuffle=True):
+    def __init__(self, model_name, batch_size, max_len, shuffle=True):
         super().__init__()
         self.model_name = model_name
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.num_workers = 8
+        self.max_length = max_len
     
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
     
@@ -59,7 +60,7 @@ class DataLoader(pl.LightningDataModule):
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=256,
+            max_length=self.max_length,
             add_special_tokens=True,
             )
         return tokenized_sentences
