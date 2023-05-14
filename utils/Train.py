@@ -41,12 +41,9 @@ def train(cfg):
 
     checkpoint = ModelCheckpoint(
         dirpath ='./checkpoints/',
-        filename = cfg['train']['model']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
-        every_n_epochs = 1
+        filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
+        every_n_epochs = 5
     )
-
-
-
     
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
