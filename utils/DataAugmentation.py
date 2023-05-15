@@ -5,9 +5,45 @@ import random
 import pandas as pd
 import sys
 
+import os
+from tqdm import tqdm
+import utils.DataPreprocessing as DataPreprocessing 
+from collections import defaultdict
+
 sys.path.append('/opt/ml/utils/LMKor/examples')
-from mask_prediction import predict
+
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
+
+
+def data_augmentation(cfg):
+    '''
+    증강된 데이터를 기존 데이터에 합침
+    '''
+    original_data = pd.read_csv('./data/train.csv')
+    methods = cfg['data_processing']
+    new_data, method_names = get_new_data(original_data, methods)
+    final_data = pd.concat([original_data, new_data], ignore_index=True)
+    final_data['id'] = final_data.index
+    os.makedirs('data/AugData', exist_ok=True)
+    file_name =  '&'.join(method_names)+'_train.csv'
+    final_data.to_csv(f'data/AugData/{file_name}')
+
+
+def get_new_data(data, methods):
+    '''
+    증강 함수를 호출하고 증강 데이터를 하나로 합침
+    '''
+    data_bag = []
+    method_names = []
+    for method in methods.keys():
+        if methods[method]:
+            function = globals()[method]
+            df = function(data)
+            data_bag.append(df)
+            method_names.append(method)
+
+    new_data = pd.concat(data_bag, ignore_index=True)
+    return new_data, method_names
 
 
 def change_masked_word(predict_words, masked_sentence, sentence):
