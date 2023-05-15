@@ -21,3 +21,4 @@ checkpoints
 config.yaml
 eda/
 nohup.out
+wandb/
