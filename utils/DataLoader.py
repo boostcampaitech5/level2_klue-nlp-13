@@ -25,6 +25,8 @@ class DataLoader(pl.LightningDataModule):
         csv 파일을 경로에 맡게 불러 옵니다.
         """
         pd_dataset = pd.read_csv(dataset_dir)
+        pd_dataset = remove_duplicate(pd_dataset) #중복 제거
+        pd_dataset = use_type_token(pd_dataset) #type token 추가
         dataset = self.preprocessing_dataset(pd_dataset)
         return dataset
 
@@ -32,8 +34,6 @@ class DataLoader(pl.LightningDataModule):
         """
         처음 불러온 csv 파일을 원하는 형태의 DataFrame으로 변경 시켜줍니다.
         """
-        new_dataset = remove_duplicate(dataset) #중복 제거
-        new_dataset = use_type_token(new_dataset) #type token 추가
         subject_entity = []
         object_entity = []
         for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
