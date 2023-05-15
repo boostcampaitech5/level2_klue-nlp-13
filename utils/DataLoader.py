@@ -126,7 +126,7 @@ class DataLoader(pl.LightningDataModule):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle, num_workers = self.num_workers)
     def val_dataloader(self):
         #return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
-        return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def predict_dataloader(self):
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def test_dataloader(self):
