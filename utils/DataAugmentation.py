@@ -177,3 +177,28 @@ def replace_entity_token_to_entity_words(sentence, entity):
     sentence=sentence.replace('<subject_entity>', entity[0])
     sentence=sentence.replace('<object_entity>', entity[1])
     return sentence
+
+
+def random_insertion(original_df):
+    '''
+    sentence에 단어 삽입 (no_relation 라벨 제외)
+    '''
+    new_df = original_df[original_df['label']!='no_relation'].reset_index(drop=True)
+    words_bag = []
+    sentences = original_df[original_df['label']=='no_relation']['sentence'].tolist()
+    for sentence in sentences:
+        words_bag += sentence.split()
+        
+    new_sentences = []
+    # for sentence in tqdm(new_df['sentence'].tolist(), desc='DataAug_Random_Insertion', mininterval=0.1):
+    for sentence in tqdm(new_df['sentence'].tolist(), desc='DataAug_Random_Insertion'):
+        length = len(sentence.split(' '))
+        insert_id = random.randrange(length)
+        new_sen = sentence.split(' ')
+        new_sen.insert(insert_id, random.choice(words_bag))
+        new_sentences.append(' '.join(new_sen))
+
+    new_df['sentence'] = new_sentences
+    return new_df
+
+
