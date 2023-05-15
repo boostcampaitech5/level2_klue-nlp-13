@@ -54,14 +54,14 @@ def train(cfg):
         filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
         every_n_epochs = 1
     )
-
+    
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
                          callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['shuffle'])
+    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 
