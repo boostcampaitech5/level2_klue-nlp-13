@@ -245,3 +245,40 @@ def sub_ob_swap(original_df):
 
 
 
+def same_type_swap(original_df):
+    '''
+    type, Label이 같은 데이터끼리 Subject_entity와 Object_entity를 sentence에 넣어서 증강(no_relation 라벨 제외)
+    '''
+    processed_df = DataPreprocessing.str_to_dict(original_df)  
+    df = processed_df[processed_df['label']!='no_relation']
+    df.loc[:,'subject_entity_type']= df['subject_entity'].apply(lambda x: x['type'])
+    df.loc[:,'object_entity_type'] = df['object_entity'].apply(lambda x: x['type'])
+    df_gb = df.groupby(['label','subject_entity_type', 'object_entity_type'])
+
+    dic = defaultdict(list)
+    for group in tqdm(df_gb.groups.keys(), desc='DataAug_Same_type_swap'):
+        group_df = df_gb.get_group(group) 
+        if len(group_df) >1 and len(group_df) < 200:
+            for i in group_df.index:
+                original_sub = group_df['subject_entity'][i]
+                original_ob = group_df['object_entity'][i]
+                sen =  group_df['sentence'][i].replace(original_sub['word'], '[sub]').replace(original_ob['word'], '[ob]')
+                for j in group_df.index:
+                    if i!=j:
+                        new_sub = group_df['subject_entity'][j]
+                        new_ob = group_df['object_entity'][j]
+                        replaced_sen = sen.replace('[sub]', new_sub['word']).replace('[ob]', new_ob['word'])
+                        label = group_df['label'][j]
+                        dic['sentence'].append(replaced_sen)
+                        dic['subject_entity'].append(str(new_sub))
+                        dic['object_entity'].append(str(new_ob))
+                        dic['label'].append(label)
+    dic['id'] = 0
+    dic['source'] ='agumentation'
+    new_df = pd.DataFrame(dic)
+    return new_df
+
+
+
+
+
