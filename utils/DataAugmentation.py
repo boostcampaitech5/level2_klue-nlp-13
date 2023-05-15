@@ -202,3 +202,35 @@ def random_insertion(original_df):
     return new_df
 
 
+def random_swap(original_df):
+    '''
+    sentence에 임의 단어 자리 바꾸기(no_relation 라벨 제외)
+    '''
+    processed_df = DataPreprocessing.str_to_dict(original_df)
+    new_df = processed_df[processed_df['label']!='no_relation'].reset_index(drop=True)
+
+    sentences = new_df['sentence'].tolist()
+    new_sentences = []
+    for i in tqdm(range(len(sentences)), desc='DataAug_Random_Swap'):
+        except1 = new_df['subject_entity'][i]['word']
+        except2 = new_df['object_entity'][i]['word']
+        new_df.loc[i,'subject_entity'] = str(new_df.loc[i, 'subject_entity'])
+        new_df.loc[i, 'object_entity'] = str(new_df.loc[i, 'object_entity'])
+
+
+        sen = sentences[i].replace(except1, '[sub]').replace(except2, '[ob]').split(' ')
+        length= list(range(len(sen)))
+        choice_lis = random.sample(length, 2)
+        id1 = choice_lis[0]
+        id2 = choice_lis[1]
+        sen[id1], sen[id2] = sen[id2], sen[id1]
+        new_sen = ' '.join(sen).replace( '[sub]', except1).replace( '[ob]', except2)
+        new_sentences.append(new_sen)
+        
+    new_df['sentence'] = new_sentences
+
+    return new_df
+
+
+
+
