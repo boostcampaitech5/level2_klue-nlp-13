@@ -234,3 +234,14 @@ def random_swap(original_df):
 
 
 
+def sub_ob_swap(original_df):
+    '''
+    subject_entity와 object_entity 칼럼을 서로 바꿈
+    '''
+    new_df = original_df[original_df['label']!='no_relation']
+    new_df['subject_entity'], new_df['object_entity'] = new_df['object_entity'], new_df['subject_entity']
+    return new_df
+
+
+
+
