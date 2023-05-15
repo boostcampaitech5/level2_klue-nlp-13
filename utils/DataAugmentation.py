@@ -55,22 +55,6 @@ def change_masked_word(predict_words, masked_sentence, sentence):
             new_sentences.append(new_sentence)
     return new_sentences
 
-
-def data_augmentation(cfg):
-    '''
-    make new sentence and concat to vanilla data
-    '''
-    dataset = pd.read_csv('./data/train.csv')
-    method = cfg['data_processing']['method']
-
-    for data in dataset.itertuples():
-        #'no_relation' data account half of data, no more 'no_relation' data
-        if data.label != 'no_relation':
-            new_data = get_new_data(data, method)
-            dataset = pd.concat([dataset, new_data])
-    dataset.to_csv(f'./eda/{method}.csv')
-
-
 def delete_word(words, p):
     '''
     delete random words by prob 'p' but without entity tokens
@@ -100,18 +84,7 @@ def get_masked_sentence(tokens):
     return ' '.join(tokens)
 
 
-def get_new_data(data, method):
-    '''
-    make new data as dataframe
-    '''
-    entity = [eval(data.subject_entity)['word'], eval(data.object_entity)['word']]
-    #change augmentation method by changing 'new_sentence'
-    augmentation_method = {'random_deletion': random_deletion(data.sentence, entity),
-                           'mlm_predict': mlm_augmentation(data.sentence, entity)}
-    new_sentences = augmentation_method[method]
-    new_data = pd.DataFrame({'id': [0]*len(new_sentences), 'sentence': new_sentences, 'subject_entity': [data.subject_entity]*len(new_sentences), 
-                             'object_entity': [data.object_entity]*len(new_sentences), 'label': [data.label]*len(new_sentences), 'source': [data.source]*len(new_sentences)})
-    return new_data
+
 
 
 def get_similarity(new_sentence, sentence):
@@ -124,24 +97,6 @@ def get_similarity(new_sentence, sentence):
     new_sen_emb, sen_emb=embed_model.encode([new_sentence, sentence])
     cos_sim = np.dot(new_sen_emb, sen_emb)/(norm(new_sen_emb)*norm(sen_emb))
     return cos_sim
-
-
-def mlm_augmentation(sentence, entity):
-    '''
-    make new sentence by using mlm model
-    replace one word in sentence to prediction token of mlm model
-    '''
-    replaced_sentence = replace_entity_words_to_entity_token(sentence, entity)
-    tokens = replaced_sentence.split()
-
-    if len(tokens) < 5:
-        return []
-    masked_sentence = get_masked_sentence(tokens)
-    masked_sentence = replace_entity_token_to_entity_words(masked_sentence, entity)
-    predict_words = predict(masked_sentence)
-    new_sentences = change_masked_word(predict_words, masked_sentence, sentence)
-    return new_sentences
-
 
 def random_deletion(sentence, entity, p_rd=0.1):
     '''
