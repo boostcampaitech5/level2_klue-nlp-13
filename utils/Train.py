@@ -55,14 +55,14 @@ def train(cfg):
         every_n_epochs = 1
     )
 
-
-
+    # learning rate monitor
+    lr_monitor = LearningRateMonitor(logging_interval='step')
     
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
-                         callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
+                         callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
     dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
