@@ -1,16 +1,16 @@
-admin: hype연어 # 실험자 이름
+admin: KYH # 실험자 이름
 patience: 5
 seed: 42
 model:
   model_name: klue/roberta-large
   batch_size: 16
-  epoch: 1
+  epoch: 2
   LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
   max_len: 50
-  scheduler: None
+  scheduler: StepLR
 EarlyStopping:
   turn_on: True # False
   monitor: valid_f1_score # valid_acc_score / valid_loss
@@ -22,6 +22,7 @@ data_processing:
   random_swap: True
   sub_ob_swap: True
   same_type_swap: True
+
 sweepcnt : 10 # sweep을 반복할 횟수(체크포인트 용량으로 인해 30이하 권장)
 sweep:
   project : KLUE
