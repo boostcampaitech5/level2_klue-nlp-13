@@ -151,7 +151,7 @@ class DataLoader(pl.LightningDataModule):
             self.test_dataset = Dataset(tokenized_test, test_label)
 
         elif stage == 'predict':
-            predict_dataset = self.load_data("./data/valid.csv")
+            predict_dataset = self.load_data("./data/test_data.csv")
             predict_label = list(map(int, predict_dataset["label"].values))
             tokenized_predict = self.tokenized_dataset(predict_dataset, self.tokenizer)
              
