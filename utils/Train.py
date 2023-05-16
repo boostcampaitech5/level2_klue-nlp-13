@@ -17,19 +17,19 @@ def train(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
-    """
+    
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
-    """
+   
     #기존Model+biLSTM
-    model = customModel(cfg['model']['model_name'],
-                  model_config,cfg['model']['LR'], 
-                  cfg['model']['LossF'], 
-                  cfg['model']['optim'], 
-                  cfg['model']['scheduler'])
+    # model = customModel(cfg['model']['model_name'],
+    #               model_config,cfg['model']['LR'], 
+    #               cfg['model']['LossF'], 
+    #               cfg['model']['optim'], 
+    #               cfg['model']['scheduler'])
     
     # logger 생성
     '''

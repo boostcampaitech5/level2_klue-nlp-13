@@ -80,11 +80,8 @@ class DataLoader(pl.LightningDataModule):
                 dataset['object_type']
             ):
                 temp = ''
-                temp = f'이 문장에서 [{e02}]은 [{e01}]의 [TYPE{e04}]이다.[SEP]'
+                temp = f'이 문장에서 [{e02}]은 [{e01}]의 [{TYPE[e04]}]이다.[SEP]'
                 concat_entity.append(temp)
-                out_dataset = pd.DataFrame({'id':dataset['id'], 'sentence':dataset['sentence'],'concat_entity':concat_entity,'label':dataset['label'],})
-                out_dataset.to_csv('../data/tokened_train.csv')
-
 
         else:
             for e01, e02 in zip(dataset['subject_entity'], dataset['object_entity']):
