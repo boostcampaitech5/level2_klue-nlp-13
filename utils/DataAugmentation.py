@@ -13,7 +13,7 @@ from collections import defaultdict
 sys.path.append('/opt/ml/utils/LMKor/examples')
 
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
-
+idx = 0
 
 def data_augmentation(cfg):
     '''
@@ -82,9 +82,6 @@ def get_masked_sentence(tokens):
             tokens[replace_idx]='<mask>'
             break
     return ' '.join(tokens)
-
-
-
 
 
 def get_similarity(new_sentence, sentence):
