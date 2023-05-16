@@ -11,7 +11,6 @@ import utils.DataPreprocessing as DataPreprocessing
 from collections import defaultdict
 
 sys.path.append('/opt/ml/utils/LMKor/examples')
-
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
 idx = 0
 

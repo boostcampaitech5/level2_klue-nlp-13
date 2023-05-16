@@ -6,6 +6,7 @@ import torch
 from utils.Score import *
 from sklearn.metrics import accuracy_score
 from transformers import AutoModelForSequenceClassification
+from torch.optim.lr_scheduler import StepLR
 
 
 class Model(pl.LightningModule):
@@ -140,15 +141,17 @@ class Model(pl.LightningModule):
         return logits
     
     def configure_optimizers(self):
+        """
+        use AdamW as optimizer and use StepLR as scheduler
+        """
         self.optimizer_dict={
             'AdamW': torch.optim.AdamW(self.parameters(), lr=self.lr)
             }
-        self.lr_scheduler_dict={
-        }
-        """
-        use AdamW as optimizer
-        """
         optimizer = self.optimizer_dict[self.optim]
+        self.lr_scheduler_dict={
+            'StepLR': StepLR(optimizer, step_size=1, gamma = 0.5)
+        }
+        
         if self.scheduler == 'None':
             return optimizer
         else:
