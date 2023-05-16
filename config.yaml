@@ -1,16 +1,16 @@
-admin: hype연어 # 실험자 이름
+admin: KYH # 실험자 이름
 patience: 5
 seed: 42
 model:
   model_name: klue/roberta-large
-  batch_size: 16
-  epoch: 5
+  batch_size: 32
+  epoch: 10
   LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
   max_len: 50
-  scheduler: None
+  scheduler: StepLR
 EarlyStopping:
   turn_on: True # False
   monitor: valid_f1_score # valid_acc_score / valid_loss

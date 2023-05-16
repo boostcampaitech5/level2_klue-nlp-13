@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 sys.path.append('/opt/ml/utils/LMKor/examples')
-from mask_prediction import predict
+# from mask_prediction import predict
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
 
 

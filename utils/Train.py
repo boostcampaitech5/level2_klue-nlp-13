@@ -6,7 +6,7 @@ from utils.Model import Model
 from utils.DataLoader import DataLoader
 from pytorch_lightning.loggers import WandbLogger
 import wandb
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
 
 
 def train(cfg):
@@ -41,11 +41,12 @@ def train(cfg):
 
     checkpoint = ModelCheckpoint(
         dirpath ='./checkpoints/',
-        filename = cfg['train']['model']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
+        filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
         every_n_epochs = 1
     )
 
-
+    # learning rate monitor
+    lr_monitor = LearningRateMonitor(logging_interval='step')
 
     
     trainer = pl.Trainer(accelerator = "auto",
