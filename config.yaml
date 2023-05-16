@@ -1,16 +1,16 @@
-admin: KYH # 실험자 이름
+admin: hype연어 # 실험자 이름
 patience: 5
 seed: 42
 model:
   model_name: klue/roberta-large
-  batch_size: 32
-  epoch: 10
+  batch_size: 16
+  epoch: 5
   LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
   max_len: 50
-  scheduler: StepLR
+  scheduler: None
 EarlyStopping:
   turn_on: True # False
   monitor: valid_f1_score # valid_acc_score / valid_loss
@@ -19,3 +19,23 @@ EarlyStopping:
   verbose: True 
 data_processing:
   method: mlm_predict
+
+sweepcnt : 10 # sweep을 반복할 횟수(체크포인트 용량으로 인해 30이하 권장)
+sweep:
+  project : KLUE
+  entity : ella0106
+  method: bayes # random, grid, bayes
+  name: sweep
+  metric:
+    name: valid_f1_score
+    goal: maximize
+  parameters: # parameter는 추가가능 합니다. 다만 추가할때마다 sweep.py의 변수를 바꿔주세요.
+    batch_size:
+      values: [16, 32]
+    epochs:
+      values: [10, 20, 30]
+    lr:
+      max: 0.0001
+      min: 0.00001
+    max_len:
+      values: [100, 150, 200]

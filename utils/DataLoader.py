@@ -7,14 +7,16 @@ from utils.Dataset import Dataset
 from utils.Utils import label_to_num
 from utils.DataPreprocessing import remove_duplicate, use_ent_token, use_type_token, use_sotype_token
 from sklearn.model_selection import train_test_split
+from utils.DataPreprocessing import *
 
 class DataLoader(pl.LightningDataModule):
-    def __init__(self, model_name, batch_size, shuffle=True):
+    def __init__(self, model_name, batch_size, max_len, shuffle=True):
         super().__init__()
         self.model_name = model_name
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.num_workers = 8
+        self.max_length = max_len
     
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
     
@@ -26,7 +28,6 @@ class DataLoader(pl.LightningDataModule):
         pd_dataset = remove_duplicate(pd_dataset)
         pd_dataset = use_type_token(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
-        
         return dataset
 
     def preprocessing_dataset(self, dataset):
@@ -59,7 +60,7 @@ class DataLoader(pl.LightningDataModule):
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=256,
+            max_length=self.max_length,
             add_special_tokens=True,
             )
         return tokenized_sentences
@@ -125,7 +126,7 @@ class DataLoader(pl.LightningDataModule):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle, num_workers = self.num_workers)
     def val_dataloader(self):
         #return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
-        return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.valid_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def predict_dataloader(self):
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size, num_workers = self.num_workers)
     def test_dataloader(self):

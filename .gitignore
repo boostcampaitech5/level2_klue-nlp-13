@@ -19,6 +19,6 @@ results/
 checkpoints
 .bash_history
 config.yaml
-.eda/
+eda/
 nohup.out
-
+wandb/
