@@ -5,17 +5,18 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
-from utils.DataPreprocessing import remove_duplicate, use_sotype_token
+from utils.DataPreprocessing import *
 from sklearn.model_selection import train_test_split
 
 class DataLoader(pl.LightningDataModule):
-    def __init__(self, model_name, batch_size, max_len, shuffle=True):
+    def __init__(self, model_name, batch_size, max_len, multi_sen, shuffle=True):
         super().__init__()
         self.model_name = model_name
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.num_workers = 8
         self.max_length = max_len
+        self.multi_sen = multi_sen
     
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
     
@@ -36,24 +37,61 @@ class DataLoader(pl.LightningDataModule):
         """
         subject_entity = []
         object_entity = []
-        for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
-            i = eval(i)['word']
-            j = eval(j)['word']
+        if self.multi_sen:
+            subject_type = []
+            object_type = []
+            for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
+                sub = eval(i)['word']
+                sub_type = eval(i)['type']
+                obj = eval(j)['word']
+                obj_type = eval(j)['type']
 
-            subject_entity.append(i)
-            object_entity.append(j)
-        out_dataset = pd.DataFrame({'id':dataset['id'], 'sentence':dataset['sentence'],'subject_entity':subject_entity,'object_entity':object_entity,'label':dataset['label'],})
+                subject_entity.append(sub)
+                subject_type.append(sub_type)
+                object_entity.append(obj)
+                object_type.append(obj_type)
+            
+            out_dataset = pd.DataFrame({'id':dataset['id'], 'sentence':dataset['sentence'],
+                                        'subject_entity':subject_entity,'subject_type': subject_type,
+                                        'object_entity':object_entity, 'object_type':object_type,
+                                        'label':dataset['label']})
+        
+        else:
+            for i,j in zip(dataset['subject_entity'], dataset['object_entity']):
+                i = eval(i)['word']
+                j = eval(j)['word']
+
+                subject_entity.append(i)
+                object_entity.append(j)
+            out_dataset = pd.DataFrame({'id':dataset['id'], 'sentence':dataset['sentence'],'subject_entity':subject_entity,'object_entity':object_entity,'label':dataset['label'],})
         return out_dataset
 
     def tokenized_dataset(self, dataset, tokenizer):
         """
         tokenizer에 따라 sentence를 tokenizing 합니다.
         """
+        TYPE = {"ORG": "단체", "PER": "사람", "DAT": "날짜", "LOC": "위치", "POH": "기타", "NOH": "수량"}
         concat_entity = []
-        for e01, e02 in zip(dataset['subject_entity'], dataset['object_entity']):
-            temp = ''
-            temp = e01 + '[SEP]' + e02
-            concat_entity.append(temp)
+        if self.multi_sen:
+            for e01, e02, e03, e04 in zip(
+                dataset['subject_entity'],
+                dataset['object_entity'],
+                dataset['subject_type'],
+                dataset['object_type']
+            ):
+                temp = ''
+                temp = f'이 문장에서 [{e02}]은 [{e01}]의 [TYPE{e04}]이다.[SEP]'
+                concat_entity.append(temp)
+                out_dataset = pd.DataFrame({'id':dataset['id'], 'sentence':dataset['sentence'],'concat_entity':concat_entity,'label':dataset['label'],})
+                out_dataset.to_csv('../data/tokened_train.csv')
+
+
+        else:
+            for e01, e02 in zip(dataset['subject_entity'], dataset['object_entity']):
+                temp = ''
+                temp = e01 + '[SEP]' + e02
+                concat_entity.append(temp)
+
         tokenized_sentences = tokenizer(
             concat_entity,
             list(dataset['sentence']),
@@ -116,7 +154,7 @@ class DataLoader(pl.LightningDataModule):
             self.test_dataset = Dataset(tokenized_test, test_label)
 
         elif stage == 'predict':
-            predict_dataset = self.load_data("./data/test_data.csv")
+            predict_dataset = self.load_data("./data/valid.csv")
             predict_label = list(map(int, predict_dataset["label"].values))
             tokenized_predict = self.tokenized_dataset(predict_dataset, self.tokenizer)
              

@@ -51,7 +51,11 @@ def train(cfg):
                          logger = wandb_logger,
                          callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
+    dataloader = DataLoader(cfg['model']['model_name'],
+                            cfg['model']['batch_size'],
+                            cfg['model']['max_len'],
+                            cfg['model']['multi_sen'],
+                            cfg['model']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 
