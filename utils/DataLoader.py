@@ -5,7 +5,7 @@ import torch
 from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
-from utils.DataPreprocessing import remove_duplicate, use_sotype_token
+from utils.DataPreprocessing import remove_duplicate, use_ent_token, use_type_token, use_sotype_token
 from sklearn.model_selection import train_test_split
 
 class DataLoader(pl.LightningDataModule):
@@ -24,7 +24,7 @@ class DataLoader(pl.LightningDataModule):
         """
         pd_dataset = pd.read_csv(dataset_dir)
         pd_dataset = remove_duplicate(pd_dataset)
-        pd_dataset = use_sotype_token(pd_dataset)
+        pd_dataset = use_type_token(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
         
         return dataset
