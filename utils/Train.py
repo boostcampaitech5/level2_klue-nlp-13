@@ -6,21 +6,31 @@ from utils.Model import Model
 from utils.DataLoader import DataLoader
 from pytorch_lightning.loggers import WandbLogger
 import wandb
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
+from utils.customModel import customModel
 
 
 def train(cfg):
-
-    '''모델 설정은 기본 설정을 그대로 가져오고 사용하는 레이블의 개수만 현재 데이터에 맞춰서 설정'''
+    '''
+    모델 설정은 기본 설정을 그대로 가져오고 사용하는 레이블의 개수만 현재 데이터에 맞춰서 설정
+    '''
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
+    """
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
-
+    """
+    #기존Model+biLSTM
+    model = customModel(cfg['model']['model_name'],
+                  model_config,cfg['model']['LR'], 
+                  cfg['model']['LossF'], 
+                  cfg['model']['optim'], 
+                  cfg['model']['scheduler'])
+    
     # logger 생성
     '''
     pip install wandb
@@ -42,14 +52,17 @@ def train(cfg):
     checkpoint = ModelCheckpoint(
         dirpath ='./checkpoints/',
         filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
-        every_n_epochs = 5
+        every_n_epochs = 1
     )
+
+    # learning rate monitor
+    lr_monitor = LearningRateMonitor(logging_interval='step')
     
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
-                         callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
+                         callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
     dataloader = DataLoader(cfg['model']['model_name'],
                             cfg['model']['batch_size'],

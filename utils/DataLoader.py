@@ -7,6 +7,7 @@ from utils.Dataset import Dataset
 from utils.Utils import label_to_num
 from utils.DataPreprocessing import *
 from sklearn.model_selection import train_test_split
+from utils.DataPreprocessing import *
 
 class DataLoader(pl.LightningDataModule):
     def __init__(self, model_name, batch_size, max_len, multi_sen, shuffle=True):
@@ -26,9 +27,8 @@ class DataLoader(pl.LightningDataModule):
         """
         pd_dataset = pd.read_csv(dataset_dir)
         pd_dataset = remove_duplicate(pd_dataset)
-        pd_dataset = use_sotype_token(pd_dataset)
+        pd_dataset = use_type_token(pd_dataset)
         dataset = self.preprocessing_dataset(pd_dataset)
-        
         return dataset
 
     def preprocessing_dataset(self, dataset):

@@ -6,10 +6,12 @@ import torch
 from utils.Score import *
 from sklearn.metrics import accuracy_score
 from transformers import AutoModelForSequenceClassification
+from transformers import AutoModel #추가한것 
+import torch
+import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
 
-
-class Model(pl.LightningModule):
+class customModel(pl.LightningModule):
     def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler):
         '''
         모델 생성
@@ -22,12 +24,19 @@ class Model(pl.LightningModule):
         self.validation_step_outputs = []
         self.test_step_outputs = []
 
+        #custom된 부분 
+        self.hidden_size=256 
+        self.num_classes=30
+        self.customModel = AutoModel.from_pretrained(MODEL_NAME)
+        self.lstm = nn.LSTM(1024,hidden_size=256,batch_first=True,bidirectional=True)
+        self.fc = nn.Linear(256*2,self.num_classes)
+
         self.MODEL_NAME = MODEL_NAME
         self.model_config = model_config
         self.lr = lr
         self.optim = optim        
         self.scheduler = scheduler
-
+        
         self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
         self.loss_dict = {
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
@@ -36,11 +45,14 @@ class Model(pl.LightningModule):
 
     def forward(self, x):
         """
-        model gets x->predict probs of each category
+        model gets x and then predicts probs of each category through pre-selected model, LSTM, and classfier(fc) Layer
         """
-        x = self.classifier(x['input_ids'],x['attention_mask'],x['token_type_ids'])
+        outputs = self.customModel(input_ids=x['input_ids'],attention_mask=x['attention_mask'],token_type_ids=x['token_type_ids'])
+        lstm_output,(last_hidden,last_cell) = self.lstm(outputs[0])
+        hidden = torch.cat((last_hidden[0],last_hidden[1]),dim=1)
+        logits = self.fc(hidden)
 
-        return x['logits']
+        return logits
     
     def training_step(self, batch, batch_idx):
         """
