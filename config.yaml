@@ -1,10 +1,10 @@
-admin: 박지연 # 실험자 이름
+admin: hype연어 # 실험자 이름
 seed: 42
 model:
   model_name: klue/roberta-large
   batch_size: 32
-  epoch: 1
-  LR: 0.00001
+  epoch: 10
+  LR: 5e-5
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
@@ -22,11 +22,12 @@ data_processing:
   random_swap: False
   sub_ob_swap: False
   same_type_swap: False
-sweepcnt : 10 # sweep을 반복할 횟수(체크포인트 용량으로 인해 30이하 권장)
+
+sweepcnt : 4 # sweep을 반복할 횟수(체크포인트 용량으로 인해 30이하 권장)
 sweep:
   project : KLUE
-  entity : ella0106
-  method: bayes # random, grid, bayes
+  entity : JHJ
+  method: grid # random, grid, bayes
   name: sweep
   metric:
     name: valid_f1_score
@@ -37,6 +38,7 @@ sweep:
     epochs:
       values: [10, 20, 30]
     lr:
+      #values : [0.00005,0.00002,0.00003,0.00001] #[0.00005,0.00003,0.00002,0.00001]
       max: 0.0001
       min: 0.00001
     max_len:
