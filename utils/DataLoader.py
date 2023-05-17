@@ -20,14 +20,16 @@ class DataLoader(pl.LightningDataModule):
         self.multi_sen = multi_sen
     
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
+        #self.tokenizer = AutoTokenizer.from_pretrained(model_name, additional_special_tokens=['#', '@']) #use_punct_mark 사용할땐 special token을 추가해주면됩니다.
     def load_data(self, dataset_dir):
         """
         csv 파일을 경로에 맡게 불러 옵니다.
         """
         pd_dataset = pd.read_csv(dataset_dir)
-        pd_dataset = remove_duplicate(pd_dataset)
-        pd_dataset = use_type_token(pd_dataset)
+        pd_dataset = remove_duplicate(pd_dataset) #중복 제거
+        pd_dataset = use_type_token(pd_dataset) #type token 추가
+        #pd_dataset = use_punct_mark(pd_dataset)
+
         dataset = self.preprocessing_dataset(pd_dataset)
         return dataset
 
@@ -104,7 +106,8 @@ class DataLoader(pl.LightningDataModule):
         """
         Split the dataset into training and validation data.
         """
-        train_dataset = self.load_data("./data/train.csv")
+        #train_dataset = self.load_data("./data/train.csv")
+        train_dataset = self.load_data("./data/translated+train.csv")
 
         #train_size:valid_size = 8:2
         train_set, valid_set = train_test_split(train_dataset, test_size=0.2, random_state=42, shuffle=True)

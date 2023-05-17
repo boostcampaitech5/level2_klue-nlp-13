@@ -25,12 +25,14 @@ def train(cfg):
                   cfg['model']['scheduler'])
    
     #기존Model+biLSTM
-    # model = customModel(cfg['model']['model_name'],
-    #               model_config,cfg['model']['LR'], 
-    #               cfg['model']['LossF'], 
-    #               cfg['model']['optim'], 
-    #               cfg['model']['scheduler'])
-    
+    """
+    model = customModel(cfg['model']['model_name'],
+                  model_config,cfg['model']['LR'], 
+                  cfg['model']['LossF'], 
+                  cfg['model']['optim'], 
+                  cfg['model']['scheduler'],
+                  cfg['model']['max_len'])
+    """
     # logger 생성
     '''
     pip install wandb
@@ -62,7 +64,8 @@ def train(cfg):
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
-                         callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
+                         callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint],
+                         precision=16) #fp16 사용
     
     dataloader = DataLoader(cfg['model']['model_name'],
                             cfg['model']['batch_size'],

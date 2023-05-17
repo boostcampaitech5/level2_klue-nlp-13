@@ -81,7 +81,8 @@ if __name__ == '__main__':
                             max_epochs = config.epochs,
                             log_every_n_steps = 1,
                             logger = wandb_logger,
-                            callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
+                            callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint],
+                            precision=16) #fp16 사용
         
         dataloader = DataLoader(cfg['model']['model_name'], config.batch_size, config.max_len, cfg['model']['shuffle'])
         trainer.fit(model=model, datamodule=dataloader)
