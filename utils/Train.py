@@ -50,9 +50,9 @@ def train(cfg):
     )
 
     checkpoint = ModelCheckpoint(
-        dirpath ='./checkpoints/',
+        dirpath =save_path,
         filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
-        every_n_epochs = 1
+        every_n_epochs = 2
     )
 
     # learning rate monitor

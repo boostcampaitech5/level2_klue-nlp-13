@@ -6,8 +6,13 @@ from transformers import AutoTokenizer
 from utils.Dataset import Dataset
 from utils.Utils import label_to_num
 from utils.DataPreprocessing import *
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from utils.DataPreprocessing import *
+
+TYPE = {"ORG": "단체", "PER": "사람", "DAT": "날짜", "LOC": "위치", "POH": "기타", "NOH": "수량"}
+LABEL = {'per:product':'<제작품>', 'org:number_of_employees/members':'명',
+       'per:place_of_residence':'거주지', 'per:schools_attended':'학교',
+       'per:place_of_birth':'출생지', 'org:founded_by':'창립'}
 
 class DataLoader(pl.LightningDataModule):
     def __init__(self, model_name, batch_size, max_len, multi_sen, shuffle=True):
@@ -70,17 +75,19 @@ class DataLoader(pl.LightningDataModule):
         """
         tokenizer에 따라 sentence를 tokenizing 합니다.
         """
-        TYPE = {"ORG": "단체", "PER": "사람", "DAT": "날짜", "LOC": "위치", "POH": "기타", "NOH": "수량"}
         concat_entity = []
         if self.multi_sen:
             for e01, e02, e03, e04 in zip(
                 dataset['subject_entity'],
                 dataset['object_entity'],
-                dataset['subject_type'],
-                dataset['object_type']
+                dataset['object_type'],
+                dataset['label']
             ):
                 temp = ''
-                temp = f'이 문장에서 [{e02}]은 [{e01}]의 [{TYPE[e04]}]이다.[SEP]'
+                if e04 in LABEL.keys():
+                    temp = f'이 문장에서 [{e02}]은 [{e01}]의 [{TYPE[e03]}][{LABEL[e04]}]이다.[SEP]'
+                else:
+                    temp = f'이 문장에서 [{e02}]은 [{e01}]의 [{TYPE[e03]}]이다.[SEP]'
                 concat_entity.append(temp)
 
         else:
@@ -99,6 +106,22 @@ class DataLoader(pl.LightningDataModule):
             add_special_tokens=True,
             )
         return tokenized_sentences
+    
+    def stratify(self):
+        train_dataset = self.load_data("./data/train.csv")
+
+        #train_size:valid_size = 8:2
+        train_set, valid_set = train_test_split(train_dataset, test_size=0.2, random_state=42, shuffle=True, stratify=train_dataset['label'])
+        
+        train_label = label_to_num(train_set['label'].values)
+        valid_label = label_to_num(valid_set['label'].values)
+
+        tokenized_train = self.tokenized_dataset(train_set, self.tokenizer)
+        tokenized_valid = self.tokenized_dataset(valid_set, self.tokenizer)
+        
+        self.train_dataset = Dataset(tokenized_train, train_label)
+        self.valid_dataset = Dataset(tokenized_valid, valid_label) 
+
 
     def split(self):
         """
@@ -140,7 +163,8 @@ class DataLoader(pl.LightningDataModule):
         stage: 모델 사용 목적(fit or test or predict)
         '''
         if stage == 'fit':
-            self.split()
+            self.stratify()
+            #self.split()
             #self.nonSplit()
         
         elif stage == 'test':
