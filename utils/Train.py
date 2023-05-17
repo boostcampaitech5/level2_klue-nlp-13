@@ -6,7 +6,7 @@ from utils.Model import Model
 from utils.DataLoader import DataLoader
 from pytorch_lightning.loggers import WandbLogger
 import wandb
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
 from utils.customModel import  customModel
 from utils.R_RoBERTa_model import RRoBERTa
 
@@ -17,13 +17,12 @@ def train(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
-    """
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
-    """
+
     #기존Model+biLSTM
     model = customModel(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
@@ -37,6 +36,7 @@ def train(cfg):
     #                 cfg['model']['LossF'], 
     #                 cfg['model']['optim'], 
     #                 cfg['model']['scheduler'])
+
 
     # logger 생성
     '''
@@ -61,14 +61,22 @@ def train(cfg):
         filename = cfg['model']['model_name']+'-{epoch}-{valid_f1_score:.2f}-{valid_acc_score:.2f}',
         every_n_epochs = 1
     )
+
+    # learning rate monitor
+    lr_monitor = LearningRateMonitor(logging_interval='step')
     
     trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
-                         callbacks=[early_stopping, checkpoint] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
+                         callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
+    dataloader = DataLoader(cfg['model']['model_name'],
+                            cfg['model']['batch_size'],
+                            cfg['model']['max_len'],
+                            cfg['model']['multi_sen'],
+                            cfg['model']['shuffle'])
+
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 

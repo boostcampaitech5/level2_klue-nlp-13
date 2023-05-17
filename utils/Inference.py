@@ -14,7 +14,11 @@ from pytorch_lightning.loggers import WandbLogger
 
 def inference(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['shuffle'], cfg['model']['max_len'])
+    dataloader = DataLoader(cfg['model']['model_name'],
+                            cfg['model']['batch_size'],
+                            cfg['model']['max_len'],
+                            cfg['model']['multi_sen'],
+                            cfg['model']['shuffle'])
 
     wandb_logger = WandbLogger(save_dir=save_path)
     trainer = pl.Trainer(accelerator="auto", logger=wandb_logger)

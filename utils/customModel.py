@@ -9,6 +9,7 @@ from transformers import AutoModelForSequenceClassification
 from transformers import AutoModel #추가한것 
 import torch
 import torch.nn as nn
+from torch.optim.lr_scheduler import StepLR
 
 class customModel(pl.LightningModule):
     def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler):
@@ -152,15 +153,16 @@ class customModel(pl.LightningModule):
         return logits
     
     def configure_optimizers(self):
+        """
+        use AdamW as optimizer and use StepLR as scheduler
+        """
         self.optimizer_dict={
             'AdamW': torch.optim.AdamW(self.parameters(), lr=self.lr)
             }
-        self.lr_scheduler_dict={
-        }
-        """
-        use AdamW as optimizer
-        """
         optimizer = self.optimizer_dict[self.optim]
+        self.lr_scheduler_dict={
+            'StepLR': StepLR(optimizer, step_size=1, gamma = 0.5)
+        }
         if self.scheduler == 'None':
             return optimizer
         else:
