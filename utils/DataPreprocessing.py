@@ -1,6 +1,9 @@
 from ast import literal_eval
 
 def remove_duplicate(dataset):
+    '''
+    Delete duplicate data with different label
+    '''
     duplicate = dataset[dataset.duplicated(subset = ['sentence', 'subject_entity', 'object_entity'], keep = False)]
     
     id = []
@@ -15,6 +18,9 @@ def remove_duplicate(dataset):
     return dataset
 
 def str_to_dict(dataset):
+    '''
+    Entity data, which is a string type, replace to dictionary type
+    '''
     def func(obj):
         List = literal_eval(obj)
         return List
@@ -26,6 +32,9 @@ def str_to_dict(dataset):
     return out
     
 def use_ent_token(dataset):
+    '''
+    Use [ENT] token to indicate entity before and after entity word
+    '''
     start_token = '[ENT]'
     end_token = '[/ENT]'
 
@@ -48,6 +57,9 @@ def use_ent_token(dataset):
     return dataset
 
 def use_type_token(dataset):
+    '''
+    Use [type] token to indicate entity before and after entity word
+    '''
     out_dataset = str_to_dict(dataset)
     sens = []
     for i in list(out_dataset['id']):
@@ -69,6 +81,9 @@ def use_type_token(dataset):
     return dataset
 
 def use_sotype_token(dataset):
+    '''
+    Use type tokens that distinguish between subject and object before and after entity words
+    '''
     out_dataset = str_to_dict(dataset)
     sens = []
     for i in list(out_dataset['id']):

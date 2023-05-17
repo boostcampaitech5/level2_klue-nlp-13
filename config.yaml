@@ -1,4 +1,5 @@
 admin: hype연어 # 실험자 이름
+patience: 5
 seed: 42
 model:
   model_name: klue/roberta-large
@@ -9,7 +10,8 @@ model:
   optim: AdamW
   shuffle: True
   max_len: 128
-  scheduler: None
+  scheduler: StepLR
+  multi_sen : True # False
 EarlyStopping:
   turn_on: True # False
   monitor: valid_f1_score # valid_acc_score / valid_loss
@@ -17,7 +19,10 @@ EarlyStopping:
   patience: 3
   verbose: True 
 data_processing:
-  method: mlm_predict
+  random_insertion: False
+  random_swap: False
+  sub_ob_swap: False
+  same_type_swap: False
 
 sweepcnt : 10 # sweep을 반복할 횟수(체크포인트 용량으로 인해 30이하 권장)
 sweep:
