@@ -5,9 +5,11 @@ import random
 import pandas as pd
 import sys
 
-sys.path.append('/opt/ml/utils/LMKor/examples')
-from mask_prediction import predict
+sys.path.append('./utils/mlm')
+from augment import load_tuned_model, augment_one_sent
+
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
+mlm_model, mlm_tokenizer, mlm_dev = load_tuned_model()
 idx = 0
 
 def change_masked_word(predict_words, masked_sentence, sentence):
@@ -32,9 +34,11 @@ def data_augmentation(cfg):
 
     for data in dataset.itertuples():
         #'no_relation' data account half of data, no more 'no_relation' data
-        if data.label != 'no_relation':
-            new_data = get_new_data(data, method)
-            dataset = pd.concat([dataset, new_data])
+        # if data.label != 'no_relation':
+        #     new_data = get_new_data(data, method)
+        #     dataset = pd.concat([dataset, new_data])
+        new_data = get_new_data(data, method)
+        dataset = pd.concat([dataset, new_data])
     dataset.to_csv(f'./eda/{method}.csv', index=False)
 
 
@@ -54,19 +58,6 @@ def delete_word(words, p):
                 new_words.append(word)
     return ' '.join(new_words)
 
-
-def get_masked_sentence(tokens):
-    '''
-    mask one word in sentence but entity tokens can't be masked
-    '''
-    while True:
-        replace_idx = random.randint(0, len(tokens)-1)
-        if '<subject_entity>' not in tokens[replace_idx] and '<object_entity>' not in tokens[replace_idx]:
-            tokens[replace_idx]='<mask>'
-            break
-    return ' '.join(tokens)
-
-
 def get_new_data(data, method):
     '''
     make new data as dataframe
@@ -75,9 +66,10 @@ def get_new_data(data, method):
     subject_entity = eval(data.subject_entity)
     object_entity = eval(data.object_entity)
     entity = [subject_entity['word'], object_entity['word']]
+        
     #change augmentation method by changing 'new_sentence'
     augmentation_method = {'random_deletion': random_deletion(data.sentence, entity),
-                           'mlm_predict': mlm_augmentation(data.sentence, entity)}
+                           'mlm_predict': mlm_augmentation(data.sentence, entity, mlm_model, mlm_tokenizer, mlm_dev)}
     new_sentences = augmentation_method[method]
     new_data=pd.DataFrame()
     for new_sentence in new_sentences:
@@ -104,20 +96,18 @@ def get_similarity(new_sentence, sentence):
     return cos_sim
 
 
-def mlm_augmentation(sentence, entity):
+def mlm_augmentation(sentence, entity, mlm_model, tokenizer, dev, rep=1):
     '''
     make new sentence by using mlm model
     replace one word in sentence to prediction token of mlm model
     '''
-    replaced_sentence = replace_entity_words_to_entity_token(sentence, entity)
-    tokens = replaced_sentence.split()
-
-    if len(tokens) < 5:
-        return []
-    masked_sentence = get_masked_sentence(tokens)
-    masked_sentence = replace_entity_token_to_entity_words(masked_sentence, entity)
-    predict_words = predict(masked_sentence)
-    new_sentences = change_masked_word(predict_words, masked_sentence, sentence)
+    new_sentences = []
+    for r in range(rep):
+        replaced_sentence = replace_entity_words_to_entity_token(sentence, entity)
+        new_sentence = augment_one_sent(mlm_model, tokenizer, replaced_sentence, dev)
+        new_sentence = replace_entity_token_to_entity_words(new_sentence, entity)
+        if get_similarity(new_sentence, sentence)>0.9 and new_sentence not in new_sentences:
+            new_sentences.append(new_sentence)
     return new_sentences
 
 
@@ -126,6 +116,7 @@ def random_deletion(sentence, entity, p_rd=0.1):
     make new sentence by random deletion method
     ※every sentence has at least 1 deletion
     ''' 
+    random.seed(42)
     sentence=replace_entity_words_to_entity_token(sentence, entity)
     words = [word for word in sentence.split(' ') if word != ""]
     new_sentences = []
