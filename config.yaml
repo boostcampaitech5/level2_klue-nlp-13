@@ -3,8 +3,8 @@ seed: 42
 model:
   model_name: klue/roberta-large
   batch_size: 32
-  epoch: 10
-  LR: 5e-5
+  epoch: 5
+  LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True

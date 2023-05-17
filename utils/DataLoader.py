@@ -106,8 +106,13 @@ class DataLoader(pl.LightningDataModule):
         """
         Split the dataset into training and validation data.
         """
-        #train_dataset = self.load_data("./data/train.csv")
-        train_dataset = self.load_data("./data/translated+train.csv")
+        train_dataset = self.load_data("./data/train.csv")
+        """
+        use pos tagging augmentation data.
+        """
+        pos_tag_dataset = pd.read_csv("./data/pos_tag2.csv", index_col = 0)
+        pos_tag_dataset = use_type_token(pos_tag_dataset)
+        pos_dataset = self.preprocessing_dataset(pos_tag_dataset)
 
         #train_size:valid_size = 8:2
         train_set, valid_set = train_test_split(train_dataset, test_size=0.2, random_state=42, shuffle=True)
