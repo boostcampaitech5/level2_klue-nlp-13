@@ -17,19 +17,19 @@ def train(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
-    """
+    
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
-    """
+   
     #기존Model+biLSTM
-    model = customModel(cfg['model']['model_name'],
-                  model_config,cfg['model']['LR'], 
-                  cfg['model']['LossF'], 
-                  cfg['model']['optim'], 
-                  cfg['model']['scheduler'])
+    # model = customModel(cfg['model']['model_name'],
+    #               model_config,cfg['model']['LR'], 
+    #               cfg['model']['LossF'], 
+    #               cfg['model']['optim'], 
+    #               cfg['model']['scheduler'])
     
     # logger 생성
     '''
@@ -64,7 +64,11 @@ def train(cfg):
                          logger = wandb_logger,
                          callbacks=[early_stopping, checkpoint, lr_monitor] if cfg['EarlyStopping']['turn_on'] else [checkpoint])
     
-    dataloader = DataLoader(cfg['model']['model_name'], cfg['model']['batch_size'], cfg['model']['max_len'], cfg['model']['shuffle'])
+    dataloader = DataLoader(cfg['model']['model_name'],
+                            cfg['model']['batch_size'],
+                            cfg['model']['max_len'],
+                            cfg['model']['multi_sen'],
+                            cfg['model']['shuffle'])
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 
