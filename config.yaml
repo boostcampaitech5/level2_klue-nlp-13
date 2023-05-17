@@ -1,5 +1,4 @@
-admin: JHJ # 실험자 이름
-patience: 5
+admin: hype연어 # 실험자 이름
 seed: 42
 model:
   model_name: klue/roberta-large
@@ -34,5 +33,13 @@ sweep:
     name: valid_f1_score
     goal: maximize
   parameters: # parameter는 추가가능 합니다. 다만 추가할때마다 sweep.py의 변수를 바꿔주세요.
-    lr: 
-      values : [0.00005,0.00002,0.00003,0.00001] #[0.00005,0.00003,0.00002,0.00001]
+    batch_size:
+      values: [16, 32]
+    epochs:
+      values: [10, 20, 30]
+    lr:
+      #values : [0.00005,0.00002,0.00003,0.00001] #[0.00005,0.00003,0.00002,0.00001]
+      max: 0.0001
+      min: 0.00001
+    max_len:
+      values: [100, 150, 200]

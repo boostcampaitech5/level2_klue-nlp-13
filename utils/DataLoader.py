@@ -18,7 +18,7 @@ class DataLoader(pl.LightningDataModule):
         self.num_workers = 8
         self.max_length = max_len
         self.multi_sen = multi_sen
-    
+
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         #self.tokenizer = AutoTokenizer.from_pretrained(model_name, additional_special_tokens=['#', '@']) #use_punct_mark 사용할땐 special token을 추가해주면됩니다.
     def load_data(self, dataset_dir):
