@@ -5,25 +5,10 @@ from pytorch_lightning.utilities.types import STEP_OUTPUT
 import torch
 from utils.Score import *
 from sklearn.metrics import accuracy_score
-from transformers import AutoModelForSequenceClassification
 from transformers import AutoModel #추가한것 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-
-class FocalLoss(nn.Module):
-    def __init__(self, weight=None, gamma=0.5, reduction="mean"):
-        nn.Module.__init__(self)
-        self.weight = weight
-        self.gamma = gamma
-        self.reduction = reduction
-
-    def forward(self, input_tensor, target_tensor):
-        log_prob = F.log_softmax(input_tensor, dim=-1)
-        prob = torch.exp(log_prob)
-        return F.nll_loss(
-            ((1 - prob) ** self.gamma) * log_prob, target_tensor, weight=self.weight, reduction=self.reduction
-        )
+from utils.Utils import FocalLoss
 
 class FCLayer(pl.LightningModule):
     def __init__(self, input_dim, output_dim, dropout_rate=0.0, use_activation=True):
