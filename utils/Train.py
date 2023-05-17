@@ -17,7 +17,7 @@ def train(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
-    """
+
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
@@ -30,6 +30,7 @@ def train(cfg):
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
+    """
     
     # logger 생성
     '''
@@ -58,7 +59,8 @@ def train(cfg):
     # learning rate monitor
     lr_monitor = LearningRateMonitor(logging_interval='step')
     
-    trainer = pl.Trainer(accelerator = "auto",
+    trainer = pl.Trainer(precision=16,
+                         accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,
