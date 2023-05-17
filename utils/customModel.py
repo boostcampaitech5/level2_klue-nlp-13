@@ -6,15 +6,18 @@ import torch
 from utils.Score import *
 from sklearn.metrics import accuracy_score
 from transformers import AutoModelForSequenceClassification
-from transformers import AutoModel #추가한것 
+from transformers import AutoModel,AutoConfig
 import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
+from utils.Utils import FocalLoss
 
 class customModel(pl.LightningModule):
-    def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler):
+    def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler,max_len):
         '''
-        모델 생성
+        custom 모델 생성
+        기존에 선택한 model에 biLSTM을 붙인 모델
+
         MODEL_NAME: 사용할 모델
         model_config: 사용할 모델 config
         lr: 모델의 lr
@@ -25,11 +28,11 @@ class customModel(pl.LightningModule):
         self.test_step_outputs = []
 
         #custom된 부분 
-        self.hidden_size=256 
         self.num_classes=30
         self.customModel = AutoModel.from_pretrained(MODEL_NAME)
-        self.lstm = nn.LSTM(1024,hidden_size=256,batch_first=True,bidirectional=True)
-        self.fc = nn.Linear(256*2,self.num_classes)
+        self.hidden_size = max_len
+        self.lstm = nn.LSTM(1024,hidden_size=self.hidden_size,batch_first=True,bidirectional=True,dropout=0.2)
+        self.fc = nn.Linear(self.hidden_size*2,self.num_classes)
 
         self.MODEL_NAME = MODEL_NAME
         self.model_config = model_config
@@ -40,6 +43,7 @@ class customModel(pl.LightningModule):
         self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
         self.loss_dict = {
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
+            'FocalLoss': FocalLoss()
             }
         self.loss_func = self.loss_dict[loss]
 
@@ -163,7 +167,6 @@ class customModel(pl.LightningModule):
         self.lr_scheduler_dict={
             'StepLR': StepLR(optimizer, step_size=1, gamma = 0.5)
         }
-        
         if self.scheduler == 'None':
             return optimizer
         else:

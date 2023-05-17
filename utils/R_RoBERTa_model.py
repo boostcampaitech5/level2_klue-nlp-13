@@ -5,12 +5,30 @@ from pytorch_lightning.utilities.types import STEP_OUTPUT
 import torch
 from utils.Score import *
 from sklearn.metrics import accuracy_score
-from transformers import AutoModelForSequenceClassification
-from torch.optim.lr_scheduler import StepLR
+from transformers import AutoModel #추가한것 
+import torch
+import torch.nn as nn
 from utils.Utils import FocalLoss
 
+class FCLayer(pl.LightningModule):
+    def __init__(self, input_dim, output_dim, dropout_rate=0.0, use_activation=True):
+        super().__init__()
+        self.save_hyperparameters()
 
-class Model(pl.LightningModule):
+        self.use_activation = use_activation
+        self.dropout = torch.nn.Dropout(dropout_rate)
+        self.linear = torch.nn.Linear(input_dim, output_dim)
+        self.tanh = torch.nn.Tanh()
+
+        torch.nn.init.xavier_uniform_(self.linear.weight)
+
+    def forward(self, x):
+        x = self.dropout(x)
+        if self.use_activation:
+            x = self.tanh(x)
+        return self.linear(x)
+
+class RRoBERTa(pl.LightningModule):
     def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler):
         '''
         모델 생성
@@ -29,7 +47,17 @@ class Model(pl.LightningModule):
         self.optim = optim        
         self.scheduler = scheduler
 
-        self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
+        self.roberta = AutoModel.from_pretrained(MODEL_NAME)
+
+        self.cls_fc_layer = FCLayer(self.model_config.hidden_size, self.model_config.hidden_size//2, 0)
+        self.entity_fc_layer = FCLayer(self.model_config.hidden_size, self.model_config.hidden_size//2, 0)
+        self.label_classifier = FCLayer(
+            self.model_config.hidden_size//2 * 3,
+            self.model_config.num_labels,
+            0,
+            use_activation=False,
+        )
+        
         self.loss_dict = {
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
             'FocalLoss': FocalLoss()
@@ -38,11 +66,26 @@ class Model(pl.LightningModule):
 
     def forward(self, x):
         """
-        model gets x->predict probs of each category
+        model gets x and then predicts probs of each category through pre-selected model, LSTM, and classfier(fc) Layer
         """
-        x = self.classifier(x['input_ids'],x['attention_mask'],x['token_type_ids'])
+        output = self.roberta(input_ids=x['input_ids'],attention_mask=x['attention_mask'], token_type_ids=x['token_type_ids'])[0]
+ 
+        sentence_end_position = torch.where(x["input_ids"] == 2)[1]
+        sent1_end, sent2_end = sentence_end_position[0], sentence_end_position[1]
 
-        return x['logits']
+        cls_vector = output[:,0,:]
+        subject_vector = output[:,1:sent1_end]
+        object_vector = output[:,sent1_end+1:sent2_end]
+
+        subject_vector = torch.mean(subject_vector, dim=1)
+        object_vector = torch.mean(object_vector, dim=1)
+
+        cls_embedding = self.cls_fc_layer(cls_vector)
+        subject_embedding = self.entity_fc_layer(subject_vector)
+        object_embedding = self.entity_fc_layer(object_vector)
+
+        concat_embedding = torch.cat([cls_embedding, subject_embedding, object_embedding], dim=-1)
+        return self.label_classifier(concat_embedding)
     
     def training_step(self, batch, batch_idx):
         """
@@ -143,17 +186,15 @@ class Model(pl.LightningModule):
         return logits
     
     def configure_optimizers(self):
-        """
-        use AdamW as optimizer and use StepLR as scheduler
-        """
         self.optimizer_dict={
             'AdamW': torch.optim.AdamW(self.parameters(), lr=self.lr)
             }
-        optimizer = self.optimizer_dict[self.optim]
         self.lr_scheduler_dict={
-            'StepLR': StepLR(optimizer, step_size=1, gamma = 0.5)
         }
-        
+        """
+        use AdamW as optimizer
+        """
+        optimizer = self.optimizer_dict[self.optim]
         if self.scheduler == 'None':
             return optimizer
         else:
