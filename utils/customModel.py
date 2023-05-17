@@ -10,6 +10,7 @@ from transformers import AutoModel,AutoConfig
 import torch
 import torch.nn as nn
 from torch.optim.lr_scheduler import StepLR
+from utils.Utils import FocalLoss
 
 class customModel(pl.LightningModule):
     def __init__(self, MODEL_NAME, model_config, lr, loss, optim, scheduler,max_len):
@@ -42,6 +43,7 @@ class customModel(pl.LightningModule):
         self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
         self.loss_dict = {
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
+            'FocalLoss': FocalLoss()
             }
         self.loss_func = self.loss_dict[loss]
 

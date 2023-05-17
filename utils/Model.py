@@ -7,6 +7,7 @@ from utils.Score import *
 from sklearn.metrics import accuracy_score
 from transformers import AutoModelForSequenceClassification
 from torch.optim.lr_scheduler import StepLR
+from utils.Utils import FocalLoss
 
 
 class Model(pl.LightningModule):
@@ -31,6 +32,7 @@ class Model(pl.LightningModule):
         self.classifier = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME, config=model_config)
         self.loss_dict = {
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
+            'FocalLoss': FocalLoss()
             }
         self.loss_func = self.loss_dict[loss]
 
