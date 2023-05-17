@@ -47,7 +47,7 @@
 # 3. 디렉토리 구조
 
 ```bash
-├── level1_semantictextsimilarity-nlp-06
+├── level2_KLUE-nlp-13
 |   ├── basecode/ (private)
 │   ├── data/ (private)
 │   ├── results/ (private)
