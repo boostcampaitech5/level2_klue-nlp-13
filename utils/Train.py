@@ -7,8 +7,8 @@ from utils.DataLoader import DataLoader
 from pytorch_lightning.loggers import WandbLogger
 import wandb
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint, LearningRateMonitor
-from utils.customModel import customModel
-
+from utils.customModel import  customModel
+from utils.R_RoBERTa_model import RRoBERTa
 
 def train(cfg):
     '''
@@ -17,13 +17,12 @@ def train(cfg):
     save_path, folder_name = cfg['save_path'], cfg['folder_name']
     model_config = AutoConfig.from_pretrained(cfg['model']['model_name'])
     model_config.num_labels = 30
-    
     model = Model(cfg['model']['model_name'],
                   model_config,cfg['model']['LR'], 
                   cfg['model']['LossF'], 
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'])
-   
+
     #기존Model+biLSTM
     """
     model = customModel(cfg['model']['model_name'],
@@ -32,7 +31,16 @@ def train(cfg):
                   cfg['model']['optim'], 
                   cfg['model']['scheduler'],
                   cfg['model']['max_len'])
+
+    
+    #R-BERT+RoBERTa
+    # model = RRoBERTa(cfg['model']['model_name'],
+    #                 model_config,cfg['model']['LR'], 
+    #                 cfg['model']['LossF'], 
+    #                 cfg['model']['optim'], 
+    #                 cfg['model']['scheduler'])                  
     """
+
     # logger 생성
     '''
     pip install wandb
@@ -72,6 +80,7 @@ def train(cfg):
                             cfg['model']['max_len'],
                             cfg['model']['multi_sen'],
                             cfg['model']['shuffle'])
+
     trainer.fit(model=model, datamodule=dataloader)
     trainer.test(model=model, datamodule=dataloader)
 

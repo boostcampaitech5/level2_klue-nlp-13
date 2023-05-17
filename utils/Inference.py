@@ -5,6 +5,7 @@ import pickle as pickle
 import pytorch_lightning as pl
 import torch
 from utils.Model import Model
+from utils.R_RoBERTa_model import RRoBERTa
 from utils.DataLoader import DataLoader
 from utils.Utils import *
 from pytorch_lightning.loggers import WandbLogger

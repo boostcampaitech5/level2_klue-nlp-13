@@ -4,15 +4,15 @@ import numpy as np
 import random
 import pandas as pd
 import sys
-
 import os
 from tqdm import tqdm
 import utils.DataPreprocessing as DataPreprocessing 
 from collections import defaultdict
+#sys.path.append('./utils/mlm')
+#from augment import load_tuned_model, augment_one_sent
 
-sys.path.append('/opt/ml/utils/LMKor/examples')
 embed_model = SentenceTransformer('jhgan/ko-sroberta-multitask')
-idx = 0
+#mlm_model, mlm_tokenizer, mlm_dev = load_tuned_model()
 
 def data_augmentation(cfg):
     '''
@@ -70,19 +70,6 @@ def delete_word(words, p):
                 new_words.append(word)
     return ' '.join(new_words)
 
-
-def get_masked_sentence(tokens):
-    '''
-    mask one word in sentence but entity tokens can't be masked
-    '''
-    while True:
-        replace_idx = random.randint(0, len(tokens)-1)
-        if '<subject_entity>' not in tokens[replace_idx] and '<object_entity>' not in tokens[replace_idx]:
-            tokens[replace_idx]='<mask>'
-            break
-    return ' '.join(tokens)
-
-
 def get_similarity(new_sentence, sentence):
     '''
     get similarity of original sentence and new_sentence
@@ -94,11 +81,27 @@ def get_similarity(new_sentence, sentence):
     cos_sim = np.dot(new_sen_emb, sen_emb)/(norm(new_sen_emb)*norm(sen_emb))
     return cos_sim
 
+def mlm_augmentation(sentence, entity, mlm_model, tokenizer, dev, rep=1):
+    '''
+    make new sentence by using mlm model
+    replace one word in sentence to prediction token of mlm model
+    '''
+    new_sentences = []
+    for r in range(rep):
+        replaced_sentence = replace_entity_words_to_entity_token(sentence, entity)
+        new_sentence = augment_one_sent(mlm_model, tokenizer, replaced_sentence, dev)
+        new_sentence = replace_entity_token_to_entity_words(new_sentence, entity)
+        if get_similarity(new_sentence, sentence)>0.9 and new_sentence not in new_sentences:
+            new_sentences.append(new_sentence)
+    return new_sentences
+
+
 def random_deletion(sentence, entity, p_rd=0.1):
     '''
     make new sentence by random deletion method
     ※every sentence has at least 1 deletion
     ''' 
+    random.seed(42)
     sentence=replace_entity_words_to_entity_token(sentence, entity)
     words = [word for word in sentence.split(' ') if word != ""]
     new_sentences = []
