@@ -118,10 +118,10 @@ def use_punct_mark(dataset):
         sen = out_dataset['sentence'][i]
         if subject_ent['start_idx'] < object_ent['start_idx']:
             sen = sen[:subject_ent['start_idx']] +' @ * ' +f'[{sub_type}]'+' * ' + subject_ent['word'] + ' @ ' + sen[subject_ent['end_idx']+1:]
-            sen = sen[:object_ent['start_idx']+11] + ' # ^ ' +f'[{obj_type}]' +' ^ '+ object_ent['word'] + ' # ' + sen[object_ent['end_idx']+12:]
+            sen = sen[:object_ent['start_idx']+14] + ' # ^ ' +f'[{obj_type}]' +' ^ '+ object_ent['word'] + ' # ' + sen[object_ent['end_idx']+15:]
         elif subject_ent['start_idx'] > object_ent['start_idx']:
             sen = sen[:object_ent['start_idx']] + ' # ^ ' +f'[{obj_type}]' +' ^ '+ object_ent['word'] + ' # ' + sen[object_ent['end_idx']+1:]
-            sen = sen[:subject_ent['start_idx']+11] +' @ * ' +f'[{sub_type}]'+' * ' + subject_ent['word'] + ' @ ' + sen[subject_ent['end_idx']+12:]
+            sen = sen[:subject_ent['start_idx']+14] +' @ * ' +f'[{sub_type}]'+' * ' + subject_ent['word'] + ' @ ' + sen[subject_ent['end_idx']+15:]
         sens.append(sen)
 
     dataset['sentence'] = sens
