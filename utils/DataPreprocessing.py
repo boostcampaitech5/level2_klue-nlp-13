@@ -89,7 +89,7 @@ def use_sotype_token(dataset):
         
     return dataset
 
-def use_punct_token(dataset):
+def use_punct_mark(dataset):
     """
     Mark entity types with punctuations
     """
