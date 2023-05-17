@@ -1,12 +1,14 @@
 admin: 박지연 # 실험자 이름
 seed: 42
 model:
-  epoch: 10
+  model_name: klue/roberta-large
+  batch_size: 32
+  epoch: 1
   LR: 0.00001
   LossF: CrossEntropyLoss
   optim: AdamW
   shuffle: True
-  max_len: 180
+  max_len: 128
   scheduler: StepLR
   multi_sen : True # False
 EarlyStopping:
