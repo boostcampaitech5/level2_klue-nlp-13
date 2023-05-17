@@ -120,4 +120,28 @@ def use_typed_entity_mark(dataset):
     dataset['sentence'] = sens
         
     return dataset
+
+def use_punct_mark(dataset):
+    """
+    Mark entity types with punctuations
+    """
+    out_dataset = str_to_dict(dataset)
+    sens = []
+    for i in list(out_dataset['id']):
+        subject_ent = out_dataset['subject_entity'][i]
+        object_ent = out_dataset['object_entity'][i]
+        sub_type = subject_ent['type']
+        obj_type = subject_ent['type']
+        sen = out_dataset['sentence'][i]
+        if subject_ent['start_idx'] < object_ent['start_idx']:
+            sen = sen[:subject_ent['start_idx']] +' @ * ' +f'[{sub_type}]'+' * ' + subject_ent['word'] + ' @ ' + sen[subject_ent['end_idx']+1:]
+            sen = sen[:object_ent['start_idx']+14] + ' # ^ ' +f'[{obj_type}]' +' ^ '+ object_ent['word'] + ' # ' + sen[object_ent['end_idx']+15:]
+        elif subject_ent['start_idx'] > object_ent['start_idx']:
+            sen = sen[:object_ent['start_idx']] + ' # ^ ' +f'[{obj_type}]' +' ^ '+ object_ent['word'] + ' # ' + sen[object_ent['end_idx']+1:]
+            sen = sen[:subject_ent['start_idx']+14] +' @ * ' +f'[{sub_type}]'+' * ' + subject_ent['word'] + ' @ ' + sen[subject_ent['end_idx']+15:]
+        sens.append(sen)
+
+    dataset['sentence'] = sens
+        
+    return dataset
     
