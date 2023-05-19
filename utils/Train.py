@@ -60,8 +60,7 @@ def train(cfg):
     # learning rate monitor
     lr_monitor = LearningRateMonitor(logging_interval='step')
     
-    trainer = pl.Trainer(precision=16,
-                         accelerator = "auto",
+    trainer = pl.Trainer(accelerator = "auto",
                          max_epochs = cfg['model']['epoch'],
                          log_every_n_steps = 1,
                          logger = wandb_logger,

@@ -40,7 +40,7 @@ if __name__ == '__main__':
         첫 실행할 때 로그인을 위해 본인 api key를 복사해서 붙여넣어주세요
         wandblog는 results 폴더에 실행모델과 함께 저장됩니다
         '''
-        wandb.init(name=folder_name, project="KLUE", entity="JHJ", dir=save_path)
+        wandb.init(name=folder_name, project="KLUE", entity="Hype연어", dir=save_path)
         wandb_logger = WandbLogger(save_dir=save_path)
         wandb_logger.experiment.config.update(cfg)
 
