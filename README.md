@@ -12,7 +12,7 @@
 
 ## 🗓️ 진행 과정
 
-<img width="959" alt="Screenshot 2023-05-24 at 3 31 48 PM" src=>
+[<img width="959" alt="Screenshot 2023-05-24 at 3 31 48 PM" src=>](https://user-images.githubusercontent.com/42113966/241580481-41e1218f-1efa-4959-b7c4-7ce40eeaf6b9.png)]
 
 <br>
 
