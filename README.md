@@ -102,10 +102,10 @@
 |분류|내용|
 |:--:|--|
 |데이터|• `raw data` : 기본 train 데이터 32470개 |
-|모델|• [`klue/bert-base`](https://huggingface.co/klue/bert-base) • [`klue/roberta-large`](https://huggingface.co/klue/roberta-large) • `HuggingFace Transformer Model`+`Pytorch Lightning`활용 + biLSTM Layer 추가 • RBERT 모델 구조 활용|
+|모델|• [`klue/bert-base`](https://huggingface.co/klue/bert-base), [`klue/roberta-large`](https://huggingface.co/klue/roberta-large), `HuggingFace Transformer Model`+`Pytorch Lightning`활용 + biLSTM Layer 추가 , RBERT 모델 구조 활용|
 |전처리|• `Entity Token` : Entity marker / Type marker / Typed entity marker / SUB,OBJ marker / punct(한글) 등 다양한 entity representation을 적용하여 최적의 성능을 내는 entity representation 적용 |
 |증강|• Easy Data Augmentation, Back Translation, MLM Model, 문장 유사도 측정으로 증강, 품사 태깅으로 증강, Label & Entity 같은 행 서로 단어 교체|
-|앙상블 방법|•`micro F1`과 `auprc` 각각 기준으로 점수가 높았던 모델들로 soft voting 진행|
+|앙상블 방법|• `micro F1`과 `auprc` 각각 기준으로 점수가 높았던 모델들로 soft voting 진행|
 |모델 성능 개선 노력|• Learning Rate Scheduling, Focal Loss 적용, fp16으로 학습 속도 향상, confusion matrix로 모델 성능 평가|
 
 <br>
